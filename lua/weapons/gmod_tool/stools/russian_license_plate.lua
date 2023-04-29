@@ -13,9 +13,14 @@ TOOL.ClientConVar["nocollide"] = "1"
 
 
 function TOOL:LeftClick(trace)
-    if not RussianLicensePlates.IsValid(self:GetClientInfo("category"), self:GetClientInfo("type")) then return end
-    
+    local license_category, license_type = self:GetClientInfo("category"), self:GetClientInfo("type")
+    if not RussianLicensePlates.IsValid(license_category, license_type) then return end
+ 
+    local ply = self:GetOwner()
+
     if SERVER then
+        if not ply:CheckLimit(self.Mode) then return end 
+
         local angs = trace.HitNormal:Angle()
         angs:RotateAroundAxis(angs:Right(), -90)
 
@@ -23,8 +28,8 @@ function TOOL:LeftClick(trace)
             ent:SetPos(trace.HitPos)
             ent:SetAngles(angs)
 
-            ent:SetType(self:GetClientInfo("type"))
-            ent:SetCategory(self:GetClientInfo("category"))
+            ent:SetCategory(license_category)
+            ent:SetType(license_type)
 
             self:UpdateEntity(ent)
         ent:Spawn()
@@ -32,6 +37,9 @@ function TOOL:LeftClick(trace)
         if self:GetClientInfo("weld") == "1" then
             constraint.Weld(ent, trace.Entity, 0, trace.PhysicsBone, 0, self:GetClientInfo("nocollide") == "1")
         end
+
+        ply:AddCount(self.Mode, ent)
+        ply:AddCleanup(self.Mode, ent)
 
         undo.Create("Russian License Plate")
             undo.AddEntity(ent)
@@ -65,7 +73,11 @@ function TOOL:UpdateEntity(ent)
 end
 
 
-if CLIENT then
+cleanup.Register(TOOL.Mode)
+
+if SERVER then
+    CreateConVar("sbox_max" .. TOOL.Mode, 8)
+else
     function TOOL.BuildCPanel(panel)
         local combobox_category = panel:ComboBox("#rlp.category.title", "russian_license_plate_category")
         combobox_category:AddChoice("#rlp.category.car", "car")
