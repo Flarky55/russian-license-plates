@@ -1,7 +1,9 @@
 TOOL.Category = "#tool.russian_license_plate.name"
 TOOL.Name = "#rlp.tool.name"
 TOOL.Information = {
-    {name = "left"}
+    {name = "left"},
+    {name = "right"},
+    {name = "reload"}
 }
 
 TOOL.ClientConVar["category"] = "car"
@@ -56,9 +58,25 @@ function TOOL:RightClick(trace)
     local ent = trace.Entity
     if not IsValid(ent) or ent:GetClass() ~= "sent_russian_license_plate" then return end
 
-    self:UpdateEntity(ent)
+    if SERVER then
+        self:UpdateEntity(ent) 
+    end
 
     return true
+end
+
+function TOOL:Reload(trace)
+    if CLIENT then
+        local ent = trace.Entity
+        if not IsValid(ent) or ent:GetClass() ~= "sent_russian_license_plate" then return end
+    
+        GetConVar(self.Mode .. "_category"):SetString(ent:GetCategory())
+        GetConVar(self.Mode .. "_type"):SetString(ent:GetType())
+        GetConVar(self.Mode .. "_number"):SetString(ent:GetNumber())
+        GetConVar(self.Mode .. "_region"):SetString(ent:GetRegion())
+
+        return true
+    end
 end
 
 
