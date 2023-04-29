@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/conred/special_znak"
+	"$bumpmap" "models/conred/special_znak_bump"
+}

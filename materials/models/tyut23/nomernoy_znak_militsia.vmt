@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/conred/nomernoy_znak_militsia"
+	"$bumpmap" "models/conred/nomernoy_znak_multinormal"
+}
