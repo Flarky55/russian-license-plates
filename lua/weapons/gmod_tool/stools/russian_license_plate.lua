@@ -65,18 +65,18 @@ function TOOL:RightClick(trace)
     return true
 end
 
-function TOOL:Reload(trace)
-    if CLIENT then
-        local ent = trace.Entity
-        if not IsValid(ent) or ent:GetClass() ~= "sent_russian_license_plate" then return end
-    
-        GetConVar(self.Mode .. "_category"):SetString(ent:GetCategory())
-        GetConVar(self.Mode .. "_type"):SetString(ent:GetType())
-        GetConVar(self.Mode .. "_number"):SetString(ent:GetNumber())
-        GetConVar(self.Mode .. "_region"):SetString(ent:GetRegion())
+function TOOL:Reload(trace)    
+    local ent = trace.Entity
+    if not IsValid(ent) or ent:GetClass() ~= "sent_russian_license_plate" then return end
 
-        return true
+    if CLIENT or game.SinglePlayer() then
+        RunConsoleCommand(self.Mode .. "_category", ent:GetCategory())
+        RunConsoleCommand(self.Mode .. "_type", ent:GetType())
+        RunConsoleCommand(self.Mode .. "_number", ent:GetNumber())
+        RunConsoleCommand(self.Mode .. "_region", ent:GetRegion())
     end
+
+    return true
 end
 
 

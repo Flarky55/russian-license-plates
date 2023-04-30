@@ -134,7 +134,7 @@ if CLIENT then
     surface.CreateFont("RussianLicensePlates.Number", {
         font = "RoadNumbers",
         extended = true,
-        size = 64,
+        size = 68,
     })
     surface.CreateFont("RussianLicensePlates.Number.Diplomatic", {
         font = "RoadNumbers",
