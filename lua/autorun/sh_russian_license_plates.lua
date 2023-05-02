@@ -12,7 +12,7 @@ RussianLicensePlates.Data = {
                 skin = 0
             },
             ["public"] = {
-                pattern = "llnnn",
+                pattern = "ll  nnn",
                 skin = 1
             },
             ["diplomatic"] = {
@@ -24,7 +24,7 @@ RussianLicensePlates.Data = {
 
                     SimpleText(number:sub(1, -4), "RussianLicensePlates.Number", -15, 0, self.Color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2)
                     SimpleText(number:sub(-3), "RussianLicensePlates.Number.Diplomatic", -15, 8, self.Color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2)
-                    SimpleText(self:GetRegion(), "RussianLicensePlates.Region", 148, -16, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
+                    SimpleText(self:GetRegion(), "RussianLicensePlates.Region", 156, -16, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
                 end,
             },
             ["police"] = {
@@ -37,10 +37,24 @@ RussianLicensePlates.Data = {
                 pattern = "NNNNLL",
                 skin = 4
             },
+            ["trailer_standart"] = {
+                pattern = "llnnnn",
+                skin = 0
+            },
+            ["trailer_police"] = {
+                color = color_white,
+                pattern = "n n n l",
+                skin = 3
+            },
+            ["trailer_military"] = {
+                color = color_white,
+                pattern = "llnnnn",
+                skin = 4
+            }
         },
         draw = function(self)
             SimpleText(self:GetNumber(), "RussianLicensePlates.Number", -48, 0, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
-            SimpleText(self:GetRegion(), "RussianLicensePlates.Region", 148, -16, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
+            SimpleText(self:GetRegion(), "RussianLicensePlates.Region", 156, -16, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
         end
     },
     ["moto"] = {

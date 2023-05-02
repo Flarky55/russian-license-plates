@@ -12,6 +12,9 @@ TOOL.ClientConVar["number"] = ""
 TOOL.ClientConVar["region"] = ""
 TOOL.ClientConVar["weld"] = "1"
 TOOL.ClientConVar["nocollide"] = "1"
+TOOL.ClientConVar["freeze"] = ""
+
+local TOOL_NAME = TOOL.Mode
 
 
 function TOOL:LeftClick(trace)
@@ -39,9 +42,13 @@ function TOOL:LeftClick(trace)
         if self:GetClientInfo("weld") == "1" then
             constraint.Weld(ent, trace.Entity, 0, trace.PhysicsBone, 0, self:GetClientInfo("nocollide") == "1")
         end
+        
+        if self:GetClientInfo("freeze") == "1" then
+            ent:GetPhysicsObject():EnableMotion(false)
+        end
 
-        ply:AddCount(self.Mode, ent)
-        ply:AddCleanup(self.Mode, ent)
+        ply:AddCount(TOOL_NAME, ent)
+        ply:AddCleanup(TOOL_NAME, ent)
 
         undo.Create("Russian License Plate")
             undo.AddEntity(ent)
@@ -70,10 +77,10 @@ function TOOL:Reload(trace)
     if not IsValid(ent) or ent:GetClass() ~= "sent_russian_license_plate" then return end
 
     if CLIENT or game.SinglePlayer() then
-        RunConsoleCommand(self.Mode .. "_category", ent:GetCategory())
-        RunConsoleCommand(self.Mode .. "_type", ent:GetType())
-        RunConsoleCommand(self.Mode .. "_number", ent:GetNumber())
-        RunConsoleCommand(self.Mode .. "_region", ent:GetRegion())
+        RunConsoleCommand(TOOL_NAME .. "_category", ent:GetCategory())
+        RunConsoleCommand(TOOL_NAME .. "_type", ent:GetType())
+        RunConsoleCommand(TOOL_NAME .. "_number", ent:GetNumber())
+        RunConsoleCommand(TOOL_NAME .. "_region", ent:GetRegion())
     end
 
     return true
@@ -91,38 +98,51 @@ function TOOL:UpdateEntity(ent)
 end
 
 
-cleanup.Register(TOOL.Mode)
+cleanup.Register(TOOL_NAME)
 
 if SERVER then
-    CreateConVar("sbox_max" .. TOOL.Mode, 8)
+    CreateConVar("sbox_max" .. TOOL_NAME, 8)
 else
     function TOOL.BuildCPanel(panel)
-        local combobox_category = panel:ComboBox("#rlp.category.title", "russian_license_plate_category")
+        local combobox_category = panel:ComboBox("#rlp.category.title", TOOL_NAME .. "_category")
         combobox_category:AddChoice("#rlp.category.car", "car")
         combobox_category:AddChoice("#rlp.category.moto", "moto")
         combobox_category:AddChoice("#rlp.category.spec", "spec")
-    
-        local combobox_type = panel:ComboBox("#rlp.type.title", "russian_license_plate_type")
-        combobox_type:AddChoice("#rlp.type.standart", "standart")
-        combobox_type:AddChoice("#rlp.type.public", "public")
-        combobox_type:AddChoice("#rlp.type.police", "police")
-        combobox_type:AddChoice("#rlp.type.diplomatic", "diplomatic")
-        combobox_type:AddChoice("#rlp.type.military", "military")
 
+        local combobox_type = panel:ComboBox("#rlp.type.title", TOOL_NAME .. "_type")
+
+        combobox_category.OnSelect = function(s, index, value, data)
+            RunConsoleCommand(TOOL_NAME .. "_category", data)
+
+            combobox_type:Clear()
+
+            for license_type in pairs(RussianLicensePlates.GetData(data).types) do
+                combobox_type:AddChoice("#rlp.type." .. license_type, license_type)    
+            end
+        end
+        
+        combobox_category:ChooseOptionID(1)
     
-        local textentry = panel:TextEntry("#rlp.tool.number", "russian_license_plate_number")
-        textentry.AllowInput = function(s, char)
+        
+        local textentry_number = panel:TextEntry("#rlp.tool.number", TOOL_NAME.. "_number")
+        textentry_number.AllowInput = function(s, char)
             return #s:GetValue() > 6
         end
         panel:Help("#rlp.tool.number.help")
     
-        panel:TextEntry("#rlp.tool.region", "russian_license_plate_region")
+        local textentry_region = panel:TextEntry("#rlp.tool.region", TOOL_NAME .. "_region")
+        textentry_region:SetNumeric(true)
+        textentry_region.AllowInput = function(s, char)
+            return #s:GetValue() > 2 or s:CheckNumeric(char)
+        end
         panel:Help("#rlp.tool.region.help")
 
 
-        panel:CheckBox("#rlp.tool.weld", "russian_license_plate_weld")
+        panel:CheckBox("#rlp.tool.weld", TOOL_NAME .. "_weld")
         
-        panel:CheckBox("#rlp.tool.nocollide", "russian_license_plate_nocollide")
+        panel:CheckBox("#rlp.tool.nocollide", TOOL_NAME .. "_nocollide")
         panel:Help("#rlp.tool.nocollide.help")
+
+        panel:CheckBox("#rlp.tool.freeze", TOOL_NAME .. "_freeze")
     end 
 end
