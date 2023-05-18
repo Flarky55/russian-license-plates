@@ -1,3 +1,10 @@
+local CVAR_STRICT_BYPATTERN = GetConVar("rlp_strict_bypattern")
+
+local TOOL_NAME = TOOL.Mode
+
+-- local letters = {"A", "B", "E", "K", "M", "H", "O", "P", "C", "T", "Y", "X"}
+
+
 TOOL.Category = "#tool.russian_license_plate.name"
 TOOL.Name = "#rlp.tool.name"
 TOOL.Information = {
@@ -14,24 +21,24 @@ TOOL.ClientConVar["weld"] = "1"
 TOOL.ClientConVar["nocollide"] = "1"
 TOOL.ClientConVar["freeze"] = ""
 
-local TOOL_NAME = TOOL.Mode
-
 
 function TOOL:LeftClick(trace)
     local license_category, license_type = self:GetClientInfo("category"), self:GetClientInfo("type")
-    if not RussianLicensePlates.IsValid(license_category, license_type) then return end
- 
+    local data_category, data_type = RussianLicensePlates.GetData(license_category, license_type)
+    if not data_category then return end
+
+    local number = self:GetClientInfo("number")
+    
+    if CVAR_STRICT_BYPATTERN:GetBool() and number ~= "" and not RussianLicensePlates.IsMatchPattern(number, data_type.pattern) then return end
+
     local ply = self:GetOwner()
 
     if SERVER then
         if not ply:CheckLimit(self.Mode) then return end 
 
-        local angs = trace.HitNormal:Angle()
-        angs:RotateAroundAxis(angs:Right(), -90)
-
         local ent = ents.Create("sent_russian_license_plate")
             ent:SetPos(trace.HitPos)
-            ent:SetAngles(angs)
+            ent:SetAngles(trace.HitNormal:Angle())
 
             ent:SetCategory(license_category)
             ent:SetType(license_type)

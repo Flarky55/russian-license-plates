@@ -5,7 +5,7 @@ local SimpleText = CLIENT and draw.SimpleText
 RussianLicensePlates = {}
 RussianLicensePlates.Data = {
     ["car"] = {
-        model = "models/tyut23/nomernoy_znak.mdl",
+        model = "models/conred/license_plate_auto.mdl",
         types = {
             ["standart"] = {
                 pattern = "lnnnll",
@@ -13,29 +13,33 @@ RussianLicensePlates.Data = {
             },
             ["public"] = {
                 pattern = "ll  nnn",
-                skin = 1
+                skin = 1,
+                bodygroups = "0001"
             },
             ["diplomatic"] = {
                 color = color_white,
                 pattern = "nnnDnnn",
                 skin = 2,
+                bodygroups = "0001",
                 draw = function(self)
                     local number = self:GetNumber()
 
                     SimpleText(number:sub(1, -4), "RussianLicensePlates.Number", -15, 0, self.Color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2)
                     SimpleText(number:sub(-3), "RussianLicensePlates.Number.Diplomatic", -15, 8, self.Color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2)
-                    SimpleText(self:GetRegion(), "RussianLicensePlates.Region", 156, -16, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
+                    SimpleText(self:GetRegion(), "RussianLicensePlates.Region", 148, -16, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
                 end,
             },
             ["police"] = {
                 color = color_white,
                 pattern = "lnnnn",
-                skin = 3
+                skin = 3,
+                bodygroups = "0001"
             },
             ["military"] = {
                 color = color_white,
                 pattern = "NNNNLL",
-                skin = 4
+                skin = 4,
+                bodygroups = "0001"
             },
             ["trailer_standart"] = {
                 pattern = "llnnnn",
@@ -44,21 +48,23 @@ RussianLicensePlates.Data = {
             ["trailer_police"] = {
                 color = color_white,
                 pattern = "n n n l",
-                skin = 3
+                skin = 3,
+                bodygroups = "0001"
             },
             ["trailer_military"] = {
                 color = color_white,
                 pattern = "llnnnn",
-                skin = 4
+                skin = 4,
+                bodygroups = "0001"
             }
         },
         draw = function(self)
             SimpleText(self:GetNumber(), "RussianLicensePlates.Number", -48, 0, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
-            SimpleText(self:GetRegion(), "RussianLicensePlates.Region", 156, -16, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
+            SimpleText(self:GetRegion(), "RussianLicensePlates.Region", 148, -16, self.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2)
         end
     },
     ["moto"] = {
-        model = "models/tyut23/moto_znak.mdl",
+        model = "models/conred/license_plate_auto.mdl",
         types = {
             ["standart"] = {
                 pattern = "NNNNLL",
@@ -91,7 +97,7 @@ RussianLicensePlates.Data = {
         end,
     },
     ["spec"] = {
-        model = "models/tyut23/special_znak.mdl",
+        model = "models/conred/license_plate_auto.mdl",
         types = {
             ["standart"] = {
                 pattern = "NNNNLL",
@@ -135,12 +141,70 @@ local generators = {
 function RussianLicensePlates.GenerateByPattern(pattern)
     local result = ""
     for i = 1, #pattern do 
-        local id = pattern[i]
-        local generator = generators[id:upper()]
+        local char = pattern[i]
+        local generator = generators[char:upper()]
 
-        result = result .. (generator and generator() or id)
+        result = result .. (generator and generator() or char)
     end
     return result
+end
+
+local letters_check = {}; do
+    for i = 1, #letters do
+        letters_check[letters[i]] = true
+    end
+end
+local generators_check = {
+    ["L"] = function(char)
+        return letters_check[char] or false
+    end,
+    ["N"] = function(char)
+        return tonumber(char) ~= nil
+    end
+}
+function RussianLicensePlates.IsMatchPattern(text, pattern)
+    if #text ~= #pattern then return false end
+
+    for i = 1, #text do
+        local char_text = text[i]
+        local char_pattern = pattern[i]
+        local generator_check = generators_check[char_pattern:upper()]
+
+        if generator_check then
+            if not generator_check(char_text:upper()) then
+                return false
+            end
+        elseif char_text ~= char_pattern then
+            return false
+        end
+    end
+
+    return true
+end
+
+
+local letters_transfrom = {
+    ["А"] = "A",
+    ["В"] = "B",
+    ["Е"] = "E",
+    ["К"] = "K",
+    ["М"] = "M",
+    ["Н"] = "H",
+    ["О"] = "O",
+    ["Р"] = "P",
+    ["С"] = "C",
+    ["Т"] = "T",
+    ["У"] = "Y",
+    ["Х"] = "X"
+}
+function RussianLicensePlates.FormatNumber(text)
+    for i = 1, #text do
+        local char = text[i]
+
+        text = text:SetChar(i, letters_transfrom[char:upper()] or char)
+    end
+
+    return text
 end
 
 
@@ -148,7 +212,7 @@ if CLIENT then
     surface.CreateFont("RussianLicensePlates.Number", {
         font = "RoadNumbers",
         extended = true,
-        size = 68,
+        size = 64,
     })
     surface.CreateFont("RussianLicensePlates.Number.Diplomatic", {
         font = "RoadNumbers",
@@ -161,6 +225,8 @@ if CLIENT then
         extended = true,
         size = 42,
     })
+else
+    CreateConVar("rlp_strict_bypattern", "0", FCVAR_ARCHIVE, "Strict players` custom license plates by pattern")
 end
 
 

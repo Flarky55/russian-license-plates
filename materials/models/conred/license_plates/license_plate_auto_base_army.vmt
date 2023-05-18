@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/conred/license_plates/license_plate_auto_base_army"
+	"$translucent" 1
+}

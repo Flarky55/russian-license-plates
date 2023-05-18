@@ -13,8 +13,9 @@ function ENT:Initialize()
     local data_category, data_type = RussianLicensePlates.GetData(self:GetCategory(), self:GetType())
 
     if SERVER then
-        self:SetModel(data_category.model or "models/tyut23/nomernoy_znak.mdl")
+        self:SetModel(data_category.model or "models/conred/license_plate_auto.mdl")
         self:SetSkin(data_type.skin or 0)
+        self:SetBodyGroups(data_type.bodygroups or "")
         self:PhysicsInit(SOLID_VPHYSICS)
     else
         self.DrawPlate = data_type.draw or data_category.draw

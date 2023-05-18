@@ -8,10 +8,11 @@ function ENT:Draw()
 
     local pos = self:GetPos()
 
-    local angs = self:GetAngles()
-    angs:RotateAroundAxis(angs:Up(), 90)
+    local ang = self:GetAngles()
+    ang:RotateAroundAxis(ang:Forward(), 90)
+    ang:RotateAroundAxis(ang:Right(), -90)
 
-    cam.Start3D2D(pos + angs:Up() * 0.1, angs, .05)
+    cam.Start3D2D(pos, ang, .05)
         self:DrawPlate()
     cam.End3D2D()
 end
