@@ -2,10 +2,8 @@ local CVAR_STRICT_BYPATTERN = GetConVar("rlp_strict_bypattern")
 
 local TOOL_NAME = TOOL.Mode
 
--- local letters = {"A", "B", "E", "K", "M", "H", "O", "P", "C", "T", "Y", "X"}
 
-
-TOOL.Category = "#tool.russian_license_plate.name"
+TOOL.Category = "Русские Номерные Знаки"
 TOOL.Name = "#rlp.tool.name"
 TOOL.Information = {
     {name = "left"},
@@ -25,7 +23,7 @@ TOOL.ClientConVar["freeze"] = ""
 function TOOL:LeftClick(trace)
     local license_category, license_type = self:GetClientInfo("category"), self:GetClientInfo("type")
     local data_category, data_type = RussianLicensePlates.GetData(license_category, license_type)
-    if not data_category then return end
+    if data_category == nil then return end
 
     local number = self:GetClientInfo("number")
     
@@ -110,7 +108,11 @@ cleanup.Register(TOOL_NAME)
 if SERVER then
     CreateConVar("sbox_max" .. TOOL_NAME, 8)
 else
+    local CVars = TOOL:BuildConVarList()
+
     function TOOL.BuildCPanel(panel)
+        local toolpresets = panel:ToolPresets(TOOL_NAME, CVars)
+
         local combobox_category = panel:ComboBox("#rlp.category.title", TOOL_NAME .. "_category")
         combobox_category:AddChoice("#rlp.category.car", "car")
         combobox_category:AddChoice("#rlp.category.moto", "moto")
@@ -134,6 +136,10 @@ else
         local textentry_number = panel:TextEntry("#rlp.tool.number", TOOL_NAME.. "_number")
         textentry_number.AllowInput = function(s, char)
             return #s:GetValue() > 6
+        end
+        textentry_number.OnChange = function(s)
+            s:SetText(RussianLicensePlates.FormatNumber(s:GetValue()))
+            s:SetCaretPos(#s:GetValue())
         end
         panel:Help("#rlp.tool.number.help")
     

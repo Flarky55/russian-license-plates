@@ -1,5 +1,12 @@
 local random = math.random
+local utf8 = utf8
 local SimpleText = CLIENT and draw.SimpleText
+local utf8_sub = utf8.sub
+
+
+local utf8_SetChar = function(s, k, v)
+    return utf8_sub(s, 0, k - 1) .. v .. utf8_sub(s, k + 1)
+end
 
 
 RussianLicensePlates = {}
@@ -129,7 +136,7 @@ end
 function RussianLicensePlates.IsValid(license_category, license_type)
     local data_category = RussianLicensePlates.Data[license_category]
 
-    return data_category and data_category.types[license_type] and true or false
+    return data_category and data_category.types[license_type] ~= nil
 end
 
 
@@ -183,6 +190,7 @@ function RussianLicensePlates.IsMatchPattern(text, pattern)
 end
 
 
+local letters_upper = {["а"]="А",["б"]="Б",["в"]="В",["г"]="Г",["д"]="Д",["е"]="Е",["ё"]="Ё",["ж"]="Ж",["з"]="З",["и"]="И",["й"]="Й",["к"]="К",["л"]="Л",["м"]="М",["н"]="Н",["о"]="О",["п"]="П",["р"]="Р",["с"]="С",["т"]="Т",["у"]="У",["ф"]="Ф",["х"]="Х",["ц"]="Ц",["ч"]="Ч",["ш"]="Ш",["щ"]="Щ",["ъ"]="Ъ",["ы"]="Ы",["ь"]="Ь",["э"]="Э",["ю"]="Ю",["я"]="Я"}
 local letters_transfrom = {
     ["А"] = "A",
     ["В"] = "B",
@@ -198,10 +206,11 @@ local letters_transfrom = {
     ["Х"] = "X"
 }
 function RussianLicensePlates.FormatNumber(text)
-    for i = 1, #text do
-        local char = text[i]
+    for i = 1, utf8.len(text) do
+        local char = letters_upper[ utf8.GetChar(text, i) ]
+        if char == nil or letters_transfrom[char] == nil then continue end
 
-        text = text:SetChar(i, letters_transfrom[char:upper()] or char)
+        text = utf8_SetChar(text, i, letters_transfrom[ char ])
     end
 
     return text
